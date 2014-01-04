@@ -39,20 +39,14 @@
        <string>Input</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_3">
-       <item row="3" column="0" colspan="2">
-        <widget class="QWidget" name="inputSpacer" native="true">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+       <item row="0" column="0">
+        <widget class="QLabel" name="databaseTitle">
+         <property name="text">
+          <string>Database:</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="0" colspan="2">
+       <item row="1" column="0">
         <widget class="QLabel" name="databaseInfo">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -62,7 +56,7 @@
          </property>
          <property name="maximumSize">
           <size>
-           <width>141</width>
+           <width>16777215</width>
            <height>16777215</height>
           </size>
          </property>
@@ -74,7 +68,7 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="0" colspan="2">
+       <item row="2" column="0">
         <widget class="QLabel" name="databaseQuestions">
          <property name="text">
           <string>0 questions</string>
@@ -87,17 +81,43 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="0" colspan="2">
+       <item row="3" column="0">
+        <widget class="QLabel" name="matchAmountTitle">
+         <property name="text">
+          <string>Number of Top Matches to Calculate:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
         <widget class="QPushButton" name="selectDatabase">
          <property name="text">
           <string>Select Database</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="0" colspan="2">
-        <widget class="QLabel" name="databaseTitle">
-         <property name="text">
-          <string>Database:</string>
+       <item row="5" column="0">
+        <widget class="QWidget" name="inputSpacer" native="true">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QSpinBox" name="matchAmountSpinner">
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>100</number>
+         </property>
+         <property name="value">
+          <number>10</number>
          </property>
         </widget>
        </item>
@@ -107,7 +127,7 @@
     <item row="0" column="1">
      <widget class="QGroupBox" name="progressGroup">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">

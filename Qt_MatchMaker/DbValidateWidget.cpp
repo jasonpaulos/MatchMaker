@@ -1,14 +1,14 @@
-#include "DatabaseDialog.h"
-#include "DbValidateWidget.h"
-#include "ui_DbValidateWidget.h"
-#include "Environment.h"
-#include "MatchMaker.h"
-#include "DatabaseMySQL.h"
 #include <QMessageBox>
 #include <QFileInfo>
 #include <QTimer>
 #include <QSqlError>
 #include <QThread>
+#include "Environment.h"
+#include "MatchMaker.h"
+#include "DatabaseMySQL.h"
+#include "DatabaseDialog.h"
+#include "DbValidateWidget.h"
+#include "ui_DbValidateWidget.h"
 
 DbValidateWidget::DbValidateWidget(DatabaseDialog *parent):
     StepWidget(parent),
@@ -23,7 +23,7 @@ DbValidateWidget::DbValidateWidget(DatabaseDialog *parent):
     dialog->setButtonState(DatabaseDialog::BUTTON_NEXT, false);
     dialog->setButtonState(DatabaseDialog::BUTTON_FINISH, false);
 
-    DatabaseManager *dm = MatchMaker::instance->dbManager.data();
+    DatabaseManager *dm = MatchMaker::instance->dbManager;
 
     dm->removeConnection(CONNECTION);
     dm->addConnection(CONNECTION, dialog->db.data(),
@@ -43,14 +43,14 @@ DbValidateWidget::DbValidateWidget(DatabaseDialog *parent):
 }
 
 DbValidateWidget::~DbValidateWidget(){
-    delete ui;
+
 }
 
 void DbValidateWidget::saveData(){
     QString table(ui->tableBox->currentText());
 
-    if(dialog->dbSetup->getTable() != table){
-        *(dialog->dbSetup) = DatabaseSetup(table);
+    if(dialog->dbSetup.getTable() != table){
+        dialog->dbSetup = DatabaseSetup(table);
     }
 }
 

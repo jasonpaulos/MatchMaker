@@ -1,8 +1,28 @@
+/* Copyright (c) 2014 Jason Paulos
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QSqlError>
-#include <qprinter.h> //<QtPrinter> would not work for some reason
 #include <QPainter>
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
@@ -11,12 +31,15 @@
 MainWindow::MainWindow(QWidget *parent):
     QMainWindow(parent),
     ui(new Ui::MainWindow()),
+    partialStop(false),
     isMaleDone(false),
     isFemaleDone(false),
     maleEngine(nullptr),
     femaleEngine(nullptr),
+    printEngine(nullptr),
     maleThread(new QThread()),
-    femaleThread(new QThread())
+    femaleThread(new QThread()),
+    dialog(nullptr)
 {
     ui->setupUi(this);
     ui->pdfInfo->setText(QDir::homePath() + "/matches.pdf");
@@ -45,52 +68,29 @@ MainWindow::~MainWindow(){
         femaleEngine->deleteLater();
     }
 
-    delete ui;
+    if(printEngine){
+        printEngine->deleteLater();
+    }
+
+    delete dialog;
+    delete pdfDialog;
+}
+
+QString MainWindow::getPdfSavePath(){
+    return ui->pdfInfo->text();
 }
 
 void MainWindow::printToPdf(){
-    ui->stop->setEnabled(false);
+    printEngine = new PrintEngine(this);
 
-    QPrinter printer(QPrinter::HighResolution);
-    printer.setOutputFormat(QPrinter::PdfFormat);
-    printer.setOutputFileName(ui->pdfInfo->text());
-    printer.setPageSize(QPrinter::Letter);
-    printer.setOrientation(QPrinter::Portrait);
+    //We'll reuse femaleThead to host printEngine
+    printEngine->moveToThread(femaleThread);
 
-    //Create a vector that contains all users
-    std::vector<User> users(matchMaker.male);
-    users.insert(users.end(), matchMaker.female.begin(), matchMaker.female.end());
+    connect(printEngine, SIGNAL(progress(int)), this, SLOT(printingProgress(int)));
+    connect(printEngine, SIGNAL(done()), this, SLOT(printingDone()));
 
-    //Sort users alphabetically
-    std::sort(users.begin(), users.end(), [](const User &u1, const User &u2){
-        return u1.name < u2.name;
-    });
-
-    QPainter painter;
-    //TODO: painter.setFont();
-
-    painter.begin(&printer);
-
-    for(auto i = users.cbegin(); i != users.cend(); ++i){
-        QString text("Matches for: " + i->name + "\n");
-        const std::vector<const User*> &matches(i->matches);
-
-        for(auto m = matches.begin(); m != matches.end(); ++m){
-            text += (*m ? (*m)->name + "\t" + QString::number(i->answers.getDistance((*m)->answers)) : "NULL") + "\n";
-        }
-
-        painter.drawText(printer.pageRect(), Qt::AlignHCenter | Qt::AlignVCenter | Qt::AlignJustify, text);
-
-        ui->printingProgress->setValue(ui->printingProgress->value() + 1);
-        ui->printingInfo->setText(QString::number(ui->printingProgress->value()) + "/" + QString::number(ui->printingProgress->maximum()));
-
-        if(i + 1 != users.cend()){
-            printer.newPage();
-        }
-    }
-
-    //Prints the pdf
-    painter.end();
+    emit printEngine->pleaseSetup();
+    emit printEngine->pleaseStartPrinting();
 }
 
 void MainWindow::maleQuery(QSqlQuery &query){
@@ -159,13 +159,155 @@ void MainWindow::femaleQuery(QSqlQuery &query){
 }
 
 void MainWindow::on_selectDatabase_clicked(){
-    bool success;
-    DatabaseSetup dbSetup;
-    QScopedPointer<Database> db;
+    if(!dialog && !pdfDialog){
+        dialog = new DatabaseDialog(this);
 
-    DatabaseDialog dialog(&success, &dbSetup, db, this);
-    dialog.exec();
+        connect(dialog, SIGNAL(finished(bool, QScopedPointer<Database>&, DatabaseSetup&)), this, SLOT(databaseDialogFinished(bool, QScopedPointer<Database>&, DatabaseSetup&)));
 
+        dialog->show();
+    }
+}
+
+void MainWindow::on_start_clicked(){
+    ui->start->setEnabled(false);
+    ui->stop->setEnabled(false);
+    ui->clear->setEnabled(false);
+
+    if(partialStop){
+        if(!isMaleDone){
+            emit maleEngine->pleaseStartMatching();
+        }
+
+        if(!isFemaleDone){
+            emit femaleEngine->pleaseStartMatching();
+        }
+
+        if(isMaleDone && isFemaleDone){
+            emit printEngine->pleaseStartPrinting();
+        }
+    }else{
+        ui->inputGroup->setEnabled(false);
+        ui->outputGroup->setEnabled(false);
+
+        ui->usersProgress->setMaximum(0);
+        ui->usersProgress->setValue(-1);
+        ui->usersInfo->setText("Loading...");
+
+        QString query("SELECT " +
+                      (matchMaker.dbSetup.hasFirstName() ? matchMaker.dbSetup.getFirstName() + ", " : "") +
+                      (matchMaker.dbSetup.hasMiddleName() ? matchMaker.dbSetup.getMiddleName() + ", " : "") +
+                      (matchMaker.dbSetup.hasLastName() ? matchMaker.dbSetup.getLastName() + ", " : "") +
+                      (matchMaker.dbSetup.hasGrade() ? matchMaker.dbSetup.getGrade() + ", " : "")
+        );
+
+        const QStringList &questions(matchMaker.dbSetup.getQuestions());
+
+        for(auto i = questions.begin(); i != questions.end(); ++i){
+            query += *i + (questions.endsWith(*i) ? " ": ", ");
+        }
+
+        query += "FROM " + matchMaker.dbSetup.getTable() + " WHERE ";
+
+        matchMaker.dbManager->queryConnection(CONNECTION, query + matchMaker.dbSetup.getGender() + " = " + QString::number(Gender::MALE),
+        [this](QSqlQuery query){
+            maleQuery(query);
+        });
+        matchMaker.dbManager->queryConnection(CONNECTION, query + matchMaker.dbSetup.getGender() + " = " + QString::number(Gender::FEMALE),
+        [this](QSqlQuery query){
+            femaleQuery(query);
+        });
+    }
+}
+
+void MainWindow::on_stop_clicked(){
+    partialStop = true;
+
+    ui->start->setEnabled(true);
+    ui->stop->setEnabled(false);
+    ui->clear->setEnabled(true);
+
+    if(!isMaleDone){
+        emit maleEngine->pleaseStopMatching();
+    }
+
+    if(!isFemaleDone){
+        emit femaleEngine->pleaseStopMatching();
+    }
+
+    if(isMaleDone && isFemaleDone){
+        emit printEngine->pleaseStartPrinting();
+    }
+}
+
+void MainWindow::on_clear_clicked(){
+    partialStop = false;
+
+    ui->start->setEnabled(true);
+    ui->clear->setEnabled(false);
+
+    ui->inputGroup->setEnabled(true);
+    ui->outputGroup->setEnabled(true);
+
+    ui->usersProgress->setMaximum(1);
+    ui->usersProgress->setValue(0);
+    ui->usersInfo->setText("");
+
+    ui->maleProgress->setMaximum(1);
+    ui->maleProgress->setValue(0);
+    ui->maleInfo->setText("0/0");
+
+    ui->femaleProgress->setMaximum(1);
+    ui->femaleProgress->setValue(0);
+    ui->femaleInfo->setText("0/0");
+
+    ui->totalProgress->setMaximum(1);
+    ui->totalProgress->setValue(0);
+    ui->totalInfo->setText("0/0");
+
+    ui->printingProgress->setMaximum(1);
+    ui->printingProgress->setValue(0);
+    ui->printingInfo->setText("0/0");
+
+    matchMaker.male.clear();
+    matchMaker.female.clear();
+
+    if(maleEngine){
+        maleEngine->deleteLater();
+        maleEngine = nullptr;
+    }
+
+    if(femaleEngine){
+        femaleEngine->deleteLater();
+        femaleEngine = nullptr;
+    }
+
+    if(printEngine){
+        printEngine->deleteLater();
+        printEngine = nullptr;
+    }
+}
+
+void MainWindow::on_selectPdf_clicked(){
+    if(!pdfDialog && !dialog){
+
+        //Qt::Sheet will make the dialog appear as a sheet in Mac OSX
+        pdfDialog = new QFileDialog(this, Qt::Sheet);
+
+        pdfDialog->setAcceptMode(QFileDialog::AcceptSave);
+        //pdfDialog->setWindowModality(Qt::WindowModal);
+
+        pdfDialog->setWindowTitle(tr("Save matches"));
+        pdfDialog->setDirectory(QDir::homePath());
+        pdfDialog->setNameFilter(tr("PDF (*.pdf);; All Files (*)"));
+
+        pdfDialog->open(this, SLOT(pdfFileSelected(QString)));
+        connect(pdfDialog, SIGNAL(rejected()), this, SLOT(pdfFileCancelled()));
+
+        pdfDialog->show();
+    }
+}
+
+void MainWindow::databaseDialogFinished(bool success, QScopedPointer<Database> &db, DatabaseSetup &dbSetup){
     if(success){
         QString info;
 
@@ -188,92 +330,31 @@ void MainWindow::on_selectDatabase_clicked(){
 
         ui->databaseQuestions->setText(questions == 1 ? "1 question" : QString::number(questions) + " questions");
 
-        ui->progressGroup->setEnabled(true);
         ui->start->setEnabled(true);
 
         matchMaker.dbSetup = dbSetup;
         matchMaker.db.swap(db);
     }
+
+    disconnect(dialog, SIGNAL(finished(bool, QScopedPointer<Database>&, DatabaseSetup&)), this, SLOT(databaseDialogFinished(bool, QScopedPointer<Database>&, DatabaseSetup&)));
+
+    dialog = nullptr;
 }
 
-void MainWindow::on_start_clicked(){    
-    ui->inputGroup->setEnabled(false);
-    ui->outputGroup->setEnabled(false);
-
-    ui->start->setEnabled(false);
-    ui->stop->setEnabled(false);
-    ui->clear->setEnabled(false);
-
-    ui->usersProgress->setMaximum(0);
-    ui->usersProgress->setValue(-1);
-    ui->usersInfo->setText("Loading...");
-
-    QString query("SELECT " +
-                  (matchMaker.dbSetup.hasFirstName() ? matchMaker.dbSetup.getFirstName() + ", " : "") +
-                  (matchMaker.dbSetup.hasMiddleName() ? matchMaker.dbSetup.getMiddleName() + ", " : "") +
-                  (matchMaker.dbSetup.hasLastName() ? matchMaker.dbSetup.getLastName() + ", " : "") +
-                  (matchMaker.dbSetup.hasGrade() ? matchMaker.dbSetup.getGrade() + ", " : "")
-    );
-
-    const QStringList &questions(matchMaker.dbSetup.getQuestions());
-
-    for(auto i = questions.begin(); i != questions.end(); ++i){
-        query += *i + (questions.endsWith(*i) ? " ": ", ");
+void MainWindow::pdfFileSelected(const QString &file){
+    if(!file.isNull()){
+        ui->pdfInfo->setText(file);
     }
 
-    query += "FROM " + matchMaker.dbSetup.getTable() + " WHERE ";
+    disconnect(pdfDialog, SIGNAL(rejected()), this, SLOT(pdfFileCancelled()));
 
-    matchMaker.dbManager->queryConnection(CONNECTION, query + matchMaker.dbSetup.getGender() + " = " + QString::number(Gender::MALE),
-    [this](QSqlQuery query){
-        maleQuery(query);
-    });
-    matchMaker.dbManager->queryConnection(CONNECTION, query + matchMaker.dbSetup.getGender() + " = " + QString::number(Gender::FEMALE),
-    [this](QSqlQuery query){
-        femaleQuery(query);
-    });
+    pdfDialog = nullptr;
 }
 
-void MainWindow::on_stop_clicked(){
-    ui->start->setEnabled(true);
-    ui->stop->setEnabled(false);
-    ui->clear->setEnabled(true);
+void MainWindow::pdfFileCancelled(){
+    disconnect(pdfDialog, SIGNAL(rejected()), this, SLOT(pdfFileCancelled()));
 
-    emit maleEngine->pleaseStopMatching();
-    emit femaleEngine->pleaseStopMatching();
-}
-
-void MainWindow::on_clear_clicked(){
-    ui->start->setEnabled(false);
-    ui->clear->setEnabled(false);
-
-    ui->progressGroup->setEnabled(false);
-    ui->inputGroup->setEnabled(true);
-    ui->outputGroup->setEnabled(false);
-
-    ui->usersProgress->setMaximum(1);
-    ui->usersProgress->setValue(0);
-    ui->usersInfo->setText("");
-
-    ui->maleProgress->setMaximum(1);
-    ui->maleProgress->setValue(0);
-    ui->maleInfo->setText("0/0");
-
-    ui->femaleProgress->setMaximum(1);
-    ui->femaleProgress->setValue(0);
-    ui->femaleInfo->setText("0/0");
-
-    ui->totalProgress->setMaximum(1);
-    ui->totalProgress->setValue(0);
-    ui->totalInfo->setText("0/0");
-
-    matchMaker.male.clear();
-    matchMaker.female.clear();
-
-    delete maleEngine;
-    delete femaleEngine;
-
-    maleEngine = nullptr;
-    femaleEngine = nullptr;
+    pdfDialog = nullptr;
 }
 
 void MainWindow::slotShowError(QString error){
@@ -306,37 +387,45 @@ void MainWindow::slotUsersLoaded(){
     ui->totalInfo->setText("0/" + QString::number(ui->totalProgress->maximum()));
     ui->printingInfo->setText(ui->totalInfo->text());
 
-    maleEngine = new MatchEngine(&matchMaker.male, &matchMaker.female, 10);
+    maleEngine = new MatchEngine(&matchMaker.male, &matchMaker.female, ui->matchAmountSpinner->value());
     maleEngine->moveToThread(maleThread);
 
-    femaleEngine = new MatchEngine(&matchMaker.female, &matchMaker.male, 10);
+    femaleEngine = new MatchEngine(&matchMaker.female, &matchMaker.male, ui->matchAmountSpinner->value());
     femaleEngine->moveToThread(femaleThread);
-
-    connect(maleThread, SIGNAL(started()), maleEngine, SLOT(setup()));
-    connect(femaleThread, SIGNAL(started()), femaleEngine, SLOT(setup()));
 
     connect(maleEngine, SIGNAL(progress(int)), this, SLOT(maleProgress(int)));
     connect(maleEngine, SIGNAL(done()), this, SLOT(maleDone()));
     connect(femaleEngine, SIGNAL(progress(int)), this, SLOT(femaleProgress(int)));
     connect(femaleEngine, SIGNAL(done()), this, SLOT(femaleDone()));
+
+    emit maleEngine->pleaseSetup();
+    emit femaleEngine->pleaseSetup();
+
+    emit maleEngine->pleaseStartMatching();
+    emit femaleEngine->pleaseStartMatching();
 }
 
 void MainWindow::maleProgress(int complete){
     ui->maleProgress->setValue(complete);
     ui->maleInfo->setText(QString::number(complete) + "/" + QString::number(ui->maleProgress->maximum()));
 
-    int total = complete + ui->femaleProgress->value();
-    ui->totalProgress->setValue(total);
-    ui->totalInfo->setText(QString::number(total) + "/" + QString::number(ui->totalProgress->maximum()));
+    complete += ui->femaleProgress->value();
+    ui->totalProgress->setValue(complete);
+    ui->totalInfo->setText(QString::number(complete) + "/" + QString::number(ui->totalProgress->maximum()));
 }
 
 void MainWindow::femaleProgress(int complete){
     ui->femaleProgress->setValue(complete);
     ui->femaleInfo->setText(QString::number(complete) + "/" + QString::number(ui->femaleProgress->maximum()));
 
-    int total = complete + ui->maleProgress->value();
-    ui->totalProgress->setValue(total);
-    ui->totalInfo->setText(QString::number(total) + "/" + QString::number(ui->totalProgress->maximum()));
+    complete += ui->maleProgress->value();
+    ui->totalProgress->setValue(complete);
+    ui->totalInfo->setText(QString::number(complete) + "/" + QString::number(ui->totalProgress->maximum()));
+}
+
+void MainWindow::printingProgress(int complete){
+    ui->printingProgress->setValue(complete);
+    ui->printingInfo->setText(QString::number(complete) + "/" + QString::number(ui->printingProgress->maximum()));
 }
 
 void MainWindow::maleDone(){
@@ -355,15 +444,7 @@ void MainWindow::femaleDone(){
     }
 }
 
-void MainWindow::on_selectPdf_clicked(){
-    QString filePath = QFileDialog::getSaveFileName(
-                this,
-                "Save matches",
-                QDir::homePath(),
-                tr("PDF (*.pdf);; All Files (*)")
-    );
-
-    if(!filePath.isNull()){
-        ui->pdfInfo->setText(filePath);
-    }
+void MainWindow::printingDone(){
+    ui->stop->setEnabled(false);
+    ui->clear->setEnabled(true);
 }

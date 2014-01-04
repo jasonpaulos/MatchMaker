@@ -13,7 +13,14 @@ CONFIG += c++11
 TARGET = MatchMaker
 TEMPLATE = app
 
-win32:RC_FILE += resource.rc
+win32 {
+    RC_FILE += resource.rc
+}
+
+# Mac OSX icons
+unix {
+    ICON = icon.icns
+}
 
 SOURCES +=  main.cpp\
     MainWindow.cpp \
@@ -31,7 +38,8 @@ SOURCES +=  main.cpp\
     MatchMaker.cpp \
     DbFieldWidget.cpp \
     DatabaseManager.cpp \
-    MatchEngine.cpp
+    MatchEngine.cpp \
+    PrintEngine.cpp
 
 HEADERS  += MainWindow.h \
     DatabaseDialog.h \
@@ -50,7 +58,8 @@ HEADERS  += MainWindow.h \
     MatchMaker.h \
     DbFieldWidget.h \
     DatabaseManager.h \
-    MatchEngine.h
+    MatchEngine.h \
+    PrintEngine.h
 
 FORMS    += MainWindow.ui \
     DatabaseDialog.ui \

@@ -1,5 +1,24 @@
-#include "DatabaseDialog.h"
-#include "ui_DatabaseDialog.h"
+/* Copyright (c) 2014 Jason Paulos
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 #include "Environment.h"
 #include "DbChooseWidget.h"
 #include "DbMySQLWidget.h"
@@ -8,19 +27,18 @@
 #include "DbFieldWidget.h"
 #include "DatabaseMySQL.h"
 #include "DatabaseSQLite.h"
+#include "DatabaseDialog.h"
+#include "ui_DatabaseDialog.h"
 
-DatabaseDialog::DatabaseDialog(bool *success, DatabaseSetup *dbSetup, QScopedPointer<Database> &db, QWidget *parent):
-    QDialog(parent),
-    success(success),
-    dbSetup(dbSetup),
-    db(db),
+DatabaseDialog::DatabaseDialog(QWidget *parent):
+    QDialog(parent, Qt::Sheet), //Qt::Sheet will make the dialog appear as a sheet in Mac OSX
+    success(false),
+    db(nullptr),
     currentState(STATE_NONE),
-    currentWidget(NULL),
+    currentWidget(nullptr),
     ui(new Ui::DatabaseDialog())
 {
     ui->setupUi(this);
-
-    *success = false;
 
     widgetGeometry = ui->activeWidget->geometry();
     widgetName = ui->activeWidget->accessibleName();
@@ -29,7 +47,7 @@ DatabaseDialog::DatabaseDialog(bool *success, DatabaseSetup *dbSetup, QScopedPoi
 }
 
 DatabaseDialog::~DatabaseDialog(){
-    delete ui;
+
 }
 
 void DatabaseDialog::setState(State state){
@@ -81,7 +99,7 @@ bool DatabaseDialog::isButtonEnabled(Button button) const{
 }
 
 void DatabaseDialog::setButtonState(Button button, bool enabled){
-    QPushButton *pb = NULL;
+    QPushButton *pb = nullptr;
 
     switch(button){
     case BUTTON_BACK:
@@ -100,7 +118,7 @@ void DatabaseDialog::setButtonState(Button button, bool enabled){
 }
 
 void DatabaseDialog::setDefaultButton(Button button){
-    QPushButton *pb = NULL, *notDefault[2];
+    QPushButton *pb = nullptr, *notDefault[2];
 
     switch(button){
     case BUTTON_BACK:
@@ -131,53 +149,57 @@ void DatabaseDialog::closeEvent(QCloseEvent *event){
        currentWidget->saveData();
     }
 
+    emit finished(success, db, dbSetup);
+
     QDialog::closeEvent(event);
 }
 
 void DatabaseDialog::on_cancelButton_clicked(){
-    *success = false;
+    success = false;
     close();
 }
 
 void DatabaseDialog::on_backButton_clicked(){
-    if(currentState == STATE_FIELD){
-        setState(STATE_VALIDATE);
-    }else if(currentState == STATE_VALIDATE){
-        switch(db->getType()){
-        case DB_MYSQL:
-            setState(STATE_MYSQL);
-            break;
-        case DB_SQLITE:
-            setState(STATE_SQLITE);
+    if(!currentWidget || currentWidget->canGoBack()){
+        if(currentState == STATE_FIELD){
+            setState(STATE_VALIDATE);
+        }else if(currentState == STATE_VALIDATE){
+            switch(db->getType()){
+            case DB_MYSQL:
+                setState(STATE_MYSQL);
+                break;
+            case DB_SQLITE:
+                setState(STATE_SQLITE);
+            }
+        }else{
+            setState(STATE_CHOOSE);
         }
-    }else{
-        setState(STATE_CHOOSE);
     }
 }
 
 void DatabaseDialog::on_nextButton_clicked(){
-    if(currentState == STATE_CHOOSE){
-        DbChooseWidget *widget = static_cast<DbChooseWidget*>(ui->activeWidget);
+    if(!currentWidget || currentWidget->canFinish()){
+        if(currentState == STATE_CHOOSE){
+            DbChooseWidget *widget = static_cast<DbChooseWidget*>(ui->activeWidget);
 
-        switch(widget->getDatabase()){
-        case DB_MYSQL:
-            setState(STATE_MYSQL);
-            break;
-        case DB_SQLITE:
-            setState(STATE_SQLITE);
+            switch(widget->getDatabase()){
+            case DB_MYSQL:
+                setState(STATE_MYSQL);
+                break;
+            case DB_SQLITE:
+                setState(STATE_SQLITE);
+            }
+        }else if(currentState == STATE_MYSQL || currentState == STATE_SQLITE){
+            setState(STATE_VALIDATE);
+        }else if(currentState == STATE_VALIDATE){
+            setState(STATE_FIELD);
         }
-    }else if(currentState == STATE_MYSQL || currentState == STATE_SQLITE){
-        setState(STATE_VALIDATE);
-    }else if(currentState == STATE_VALIDATE){
-        setState(STATE_FIELD);
     }
 }
 
 void DatabaseDialog::on_finishButton_clicked(){
-    if(currentState == STATE_FIELD){
-        if(currentWidget->canFinish()){
-            *success = true;
-            close();
-        }
+    if(currentState == STATE_FIELD && currentWidget->canFinish()){
+        success = true;
+        close();
     }
 }
