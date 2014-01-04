@@ -43,8 +43,6 @@ public:
     ~DbSQLiteWidget();
 
     virtual void saveData();
-    virtual bool canGoBack();
-    virtual bool canFinish();
     QString getDatabaseName() const;
     void setDatabaseName(const QString &name);
 

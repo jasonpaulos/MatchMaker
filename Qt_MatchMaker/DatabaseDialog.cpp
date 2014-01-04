@@ -160,40 +160,36 @@ void DatabaseDialog::on_cancelButton_clicked(){
 }
 
 void DatabaseDialog::on_backButton_clicked(){
-    if(!currentWidget || currentWidget->canGoBack()){
-        if(currentState == STATE_FIELD){
-            setState(STATE_VALIDATE);
-        }else if(currentState == STATE_VALIDATE){
-            switch(db->getType()){
-            case DB_MYSQL:
-                setState(STATE_MYSQL);
-                break;
-            case DB_SQLITE:
-                setState(STATE_SQLITE);
-            }
-        }else{
-            setState(STATE_CHOOSE);
+    if(currentState == STATE_FIELD){
+        setState(STATE_VALIDATE);
+    }else if(currentState == STATE_VALIDATE){
+        switch(db->getType()){
+        case DB_MYSQL:
+            setState(STATE_MYSQL);
+            break;
+        case DB_SQLITE:
+            setState(STATE_SQLITE);
         }
+    }else{
+        setState(STATE_CHOOSE);
     }
 }
 
 void DatabaseDialog::on_nextButton_clicked(){
-    if(!currentWidget || currentWidget->canFinish()){
-        if(currentState == STATE_CHOOSE){
-            DbChooseWidget *widget = static_cast<DbChooseWidget*>(ui->activeWidget);
+    if(currentState == STATE_CHOOSE){
+        DbChooseWidget *widget = static_cast<DbChooseWidget*>(ui->activeWidget);
 
-            switch(widget->getDatabase()){
-            case DB_MYSQL:
-                setState(STATE_MYSQL);
-                break;
-            case DB_SQLITE:
-                setState(STATE_SQLITE);
-            }
-        }else if(currentState == STATE_MYSQL || currentState == STATE_SQLITE){
-            setState(STATE_VALIDATE);
-        }else if(currentState == STATE_VALIDATE){
-            setState(STATE_FIELD);
+        switch(widget->getDatabase()){
+        case DB_MYSQL:
+            setState(STATE_MYSQL);
+            break;
+        case DB_SQLITE:
+            setState(STATE_SQLITE);
         }
+    }else if(currentState == STATE_MYSQL || currentState == STATE_SQLITE){
+        setState(STATE_VALIDATE);
+    }else if(currentState == STATE_VALIDATE){
+        setState(STATE_FIELD);
     }
 }
 

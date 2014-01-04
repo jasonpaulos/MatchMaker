@@ -116,7 +116,7 @@ void PrintEngine::setup(){
     gradeRect.setWidth(gradeHeaderRect.width());
 
     painter.reset(new QPainter(printer.data()));
-    painter->setPen(QPen(painter->brush(), pageRect.height()/500));
+    painter->setPen(QPen(QBrush(Qt::black), pageRect.height()/500));
 
     //Sort users alphabetically
     std::sort(users.begin(), users.end(), [](const User *u1, const User *u2){

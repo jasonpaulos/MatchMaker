@@ -37,7 +37,6 @@ public:
     explicit StepWidget(DatabaseDialog *parent);
 
     virtual void saveData() = 0;
-    virtual bool canGoBack();
     virtual bool canFinish();
 
 protected:

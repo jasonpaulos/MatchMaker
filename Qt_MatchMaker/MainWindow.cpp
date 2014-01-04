@@ -39,7 +39,8 @@ MainWindow::MainWindow(QWidget *parent):
     printEngine(nullptr),
     maleThread(new QThread()),
     femaleThread(new QThread()),
-    dialog(nullptr)
+    dialog(nullptr),
+    pdfDialog(nullptr)
 {
     ui->setupUi(this);
     ui->pdfInfo->setText(QDir::homePath() + "/matches.pdf");

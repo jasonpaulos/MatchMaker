@@ -53,14 +53,6 @@ void DbSQLiteWidget::saveData(){
     }
 }
 
-bool DbSQLiteWidget::canGoBack(){
-    return !fileDialog;
-}
-
-bool DbSQLiteWidget::canFinish(){
-    return !fileDialog;
-}
-
 QString DbSQLiteWidget::getDatabaseName() const{
     return ui->path->text();
 }
@@ -71,6 +63,8 @@ void DbSQLiteWidget::setDatabaseName(const QString &name){
 
 void DbSQLiteWidget::on_browseButton_clicked(){
     if(!fileDialog){
+        dialog->setButtonState(DatabaseDialog::BUTTON_BACK, false);
+        dialog->setButtonState(DatabaseDialog::BUTTON_NEXT, false);
 
         //Qt::Sheet will make the dialog appear as a sheet in Mac OSX
         fileDialog = new QFileDialog(this, Qt::Sheet);
@@ -97,9 +91,15 @@ void DbSQLiteWidget::fileDialogSelected(const QString &file){
 
     disconnect(fileDialog, SIGNAL(rejected()), this, SLOT(fileDialogCancelled()));
     fileDialog = nullptr;
+
+    dialog->setButtonState(DatabaseDialog::BUTTON_BACK, true);
+    dialog->setButtonState(DatabaseDialog::BUTTON_NEXT, true);
 }
 
 void DbSQLiteWidget::fileDialogCancelled(){
     disconnect(fileDialog, SIGNAL(rejected()), this, SLOT(fileDialogCancelled()));
     fileDialog = nullptr;
+
+    dialog->setButtonState(DatabaseDialog::BUTTON_BACK, true);
+    dialog->setButtonState(DatabaseDialog::BUTTON_NEXT, true);
 }

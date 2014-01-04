@@ -30,10 +30,6 @@ StepWidget::StepWidget(DatabaseDialog *parent):
     setAccessibleName(parent->widgetName);
 }
 
-bool StepWidget::canGoBack(){
-    return true;
-}
-
 bool StepWidget::canFinish(){
     return true;
 }
