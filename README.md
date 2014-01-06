@@ -14,4 +14,4 @@ The current release builds of the MatchMaker application for Windows (32 and 64 
 
 ## Who created it?
 
-Jason Paulos, a sophomore as of now, created the matching program and the PHP features of the online survey. Cole Green, also a sophomore, created the HTML layout of the online survey.
+Jason Paulos, a sophomore as of now, created the matching program and the PHP features of the online survey. Cole Green, also a sophomore, created the HTML layout of the online survey. Matthew Dobosz, a sophomore as well, created the application icons.
