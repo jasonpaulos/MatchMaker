@@ -1,0 +1,52 @@
+html{
+	height: 100%;
+}
+
+body{
+	height: 100%;
+	margin: 0;
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-color: #ED0E0E;
+	
+	/* IE10 Consumer Preview */ 
+	background-image: -ms-linear-gradient(top, #ED0E0E 0%, #181FCF 100%);
+	/* Mozilla Firefox */ 
+	background-image: -moz-linear-gradient(top, #ED0E0E 0%, #181FCF 100%);
+	/* Opera */ 
+	background-image: -o-linear-gradient(top, #ED0E0E 0%, #181FCF 100%);
+	/* Webkit (Safari/Chrome 10) */ 
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #ED0E0E), color-stop(1, #181FCF));
+	/* Webkit (Chrome 11+) */ 
+	background-image: -webkit-linear-gradient(top, #ED0E0E 0%, #181FCF 100%);
+	/* W3C Markup, IE10 Release Preview */ 
+	background-image: linear-gradient(to bottom, #ED0E0E 0%, #181FCF 100%);
+}
+
+.page{
+	width: 90%;
+	margin: 0 auto;
+	padding: 5%;
+}
+
+.content{
+	border: black solid;
+	margin: 0 auto;
+	padding: 5%;
+	overflow: auto;
+	background-color: white;
+}
+
+.title{
+	font-family: Times New Roman;
+	font-size: 2em;
+}
+
+.question{
+	font-weight: bold;
+}
+
+.answer{
+	width: 20%;
+	text-align: center;
+}
