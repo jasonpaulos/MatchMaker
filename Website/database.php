@@ -17,7 +17,7 @@
 		
 		//MySQL:
 		/*$db = new PDO(
-			'mysql:dbname=DATABASE_NAME;host=HOST_ADRESS',
+			'mysql:dbname=DATABASE_NAME;host=HOST_ADDRESS',
 			'USERNAME',
 			'PASSWORD'
 		);*/
