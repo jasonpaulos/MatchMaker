@@ -2,20 +2,30 @@
 	require 'questions.php';
 	
 	$db;
+	
+	//This is the database table where user input will reside.
 	$table = 'UserInput';
 	
 	try{
-		//SQLite: $db = new PDO('sqlite:DATABSE_NAME');
+		/* Here you would initialize $db to a PDO that can access the database
+		 * you would like to use to store user information. If you want to use
+		 * SQLite or MySQL, the basic format for doing so is commented below.
+		 */
+		
+		//SQLite:
+		//$db = new PDO('sqlite:DATABSE_NAME');
+		
 		//MySQL:
-		$db = new PDO(
-			'mysql:dbname=DATABASE_NAME;host=HOST',
-			'USERNAME', //username
-			'PASSWORD' //password
-		);
+		/*$db = new PDO(
+			'mysql:dbname=DATABASE_NAME;host=HOST_ADRESS',
+			'USERNAME',
+			'PASSWORD'
+		);*/
 	}catch(PDOException $e){
 		die("Error when connecting to database: ".$e->getMessage());
 	}
 	
+	//Set for preventing SQL injection
 	$db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	

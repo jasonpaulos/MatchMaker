@@ -18,8 +18,9 @@
 		<div class="content">
 			<table style="width: 100%" border="1px">
 				<?php
-					//This page displays all of the data that is currently in the database
-					//It is for testing purposes only and should not be placed in a public website
+					/* This page displays all of the data that is currently in the database.
+					 * It is for testing purposes only and should not be placed in a public website
+					 */
 					
 					require 'database.php';
 					

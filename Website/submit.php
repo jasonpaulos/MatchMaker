@@ -42,7 +42,7 @@
 					isNameValid($_POST['lastName'], false);
 				
 				for($q = 0; $q < count($questions); ++$q){
-					if(!isset($_POST[$q]) && $_POST[$q] > 0 && $_POST[$q] <= 5){
+					if(!isset($_POST[$q]) || !($_POST[$q] == 1 || $_POST[$q] == 2 || $_POST[$q] == 3 || $_POST[$q] == 4 || $_POST[$q] == 5)){
 						$valid = false;
 					}
 				}
@@ -50,6 +50,7 @@
 				$dupe = false;
 				
 				if($valid){
+					//Formats the names such that the first letter of every word will be capitalized
 					$names = array(
 						':firstName' => ucwords(strtolower(htmlspecialchars($_POST['firstName']))),
 						':middleName' => strtoupper(htmlspecialchars($_POST['middleName'])),
@@ -102,6 +103,8 @@
 				}else{
 					$insert = 'INSERT INTO '.$table.' (firstName, middleName, lastName, gender, grade';
 					$values = 'VALUES (:firstName, :middleName, :lastName, :gender, :grade';
+					
+					//Don't have to use htmlspecialchars with $names data because it was already filtered
 					$array = array(
 						':firstName' => $names[':firstName'],
 						':middleName' => $names[':middleName'],

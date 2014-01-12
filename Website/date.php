@@ -4,7 +4,8 @@
 	
 	$startDate = strtotime('2014-01-06 00:00:00'); //Arbitrary start date
 	$endDate = strtotime('2014-01-24 23:59:59'); //Arbitrary end date
-	//Because index.php refers to the date objects, you can fully change them right here
+	
+	//Because index.php refers to the date objects, any changes you make here will be reflected everywhere
 	
 	function isBeforeStart($time){
 		global $startDate;
