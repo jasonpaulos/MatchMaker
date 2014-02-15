@@ -1,7 +1,7 @@
 MatchMaker
 ==========
 
-The purpose of the MatchMaker application is to input user information from a database, perform matching operations on that data, and then export the matches to a PDF. Here you will find a brief summary of how these three tasks are accomplished along with any other relevant information, such as how they may be improved or extended.
+The purpose of the MatchMaker application is to input user information from a database, perform matching operations on that data, and then export the matches to a PDF. Here you will find a brief summary of how these three tasks are accomplished along with any other relevant information, such as how they may be improved or extended. For more information about individual processes or implementation, please see the respective source files.
 
 1. __Input__
      * In this step, the application will access a database and store user information, such as name, gender, grade, and survey answers. All of this is done through the QtSql module, which means the program has the potential to support any database that the module supports. While it it not necessarily straightforward, in order to add support for another database type, the following must be created:
@@ -20,4 +20,4 @@ The purpose of the MatchMaker application is to input user information from a da
 		      i = 0  
 	 This value is then compared with other users of the opposite gender in order to create a sorted list of a user's top matches. However, the process is optimized to find the squared distance between users, as this speeds up the algorithm without sacrificing any precision.
 3. __Output__
-     * After the users have been matched, the results need to be printed. Each page is rendered by PrintEngine using a QPainter, and then the combined documents are saved as a PDF file. A future addition to the application might want to add support to print the matches directly to a printer, however, as of now, a PDF is a much better alternative because the results are saved on file and a variety of complex page layouts can be printed using various PDF viewing applications.
+     * After the users have been matched, the results need to be printed. Each page is rendered by PrintEngine using a QPainter, and then the combined documents are saved as a PDF file. A future addition to the application might want to add support to print the matches directly to a printer, however, as of now, a PDF is a much better alternative because the results are saved on file and a variety of complex page layouts can be printed using various PDF viewing applications. However, the PDF style is hard coded into the application, so a new version of the application may want to implement the ability to change the PDF style without recompiling.
