@@ -92,6 +92,9 @@
          <property name="text">
           <string>Number of Top Matches to Calculate:</string>
          </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item row="6" column="0">
