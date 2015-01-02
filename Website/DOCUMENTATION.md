@@ -4,7 +4,7 @@ This folder contains the files necessary to run the online survey part of the Ma
 
 * __database.php__ - This file is responsible for the creation of the database used to store user information. You can change what database is used as well as which table will be used here.
 
-* __data.php__ - This file manages the timezone as well as the start and end dates of registration.
+* __date.php__ - This file manages the timezone as well as the start and end dates of registration.
 
 * __questions.php__ - This file contains an array of every question as well as a function to verify that the name fields are properly formatted. Here you can add questions to the $questions array by using createQuestion(...).
 

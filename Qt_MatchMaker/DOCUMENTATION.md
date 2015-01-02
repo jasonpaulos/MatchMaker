@@ -4,7 +4,7 @@ MatchMaker
 The purpose of the MatchMaker application is to input user information from a database, perform matching operations on that data, and then export the matches to a PDF. Here you will find a brief summary of how these three tasks are accomplished along with any other relevant information, such as how they may be improved or extended. For more information about individual processes or implementation, please see the respective source files.
 
 1. __Input__
-     * In this step, the application will access a database and store user information, such as name, gender, grade, and survey answers. All of this is done through the QtSql module, which means the program has the potential to support any database that the module supports. While it it not necessarily straightforward, in order to add support for another database type, the following must be created:
+     * In this step, the application will access a database and store user information, such as name, gender, grade, and survey answers. All of this is done through the QtSql module, which means the program has the potential to support any database that the module supports. While it is not necessarily straightforward, in order to add support for another database type, the following must be created:
 	     * An addition to the DatabaseType enum located in Database.h
 		 * A subclass of the Database interface also located in Database.h
 		 * A subclass of StepWidget that will allow the user to input information required to connect to the database
