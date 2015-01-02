@@ -19,31 +19,34 @@
  * THE SOFTWARE.
  */
 
-#ifndef USER_H
-#define USER_H
+#ifndef MATHVECTOR_H
+#define MATHVECTOR_H
 
-#include <QString>
-#include "MathVector.h"
+#include <vector>
+#include "Environment.h"
 
-/* This class represents a user and his or her answers. The answers are stored
- * as a Point because the matching algorithm we use is centered around linear
- * algebra. The smaller the "distance" between two points from different Users are,
- * the more likely those users will be matched up. MatchEngine uses this theory
- * to calculate the matches based on the "distance" between Users' answers.
+/* A basic math vector class that can be initialized to any number of
+ * dimensions. See User.h for implementation.
  */
-class User{
+class MathVector{
 public:
-    explicit User(const QString &name, Gender gender, unsigned int dimensions);
+    explicit MathVector(unsigned int dimensions);
+    explicit MathVector(const std::vector<byte> &v);
+    MathVector(const MathVector &v);
 
-    /* This should only be called if a grade field is present in DatabaseSetup,
-     * otherwise, the return value will be undefined.
+    unsigned int getDimensions() const;
+
+    /* Calculates the distance between two points using linear algebra.
      */
-    Grade getGrade() const;
+    float getDistance(const MathVector &v) const;
 
-    QString name;
-    Gender gender;
-    MathVector answers;
-    std::vector<const User*> matches;
+    /* Calculates the squared distance between two points using linear
+     * algebra. This method doesn't call sqrt() like the above one,
+     * so it is faster.
+     */
+    float getDistanceSquared(const MathVector &v) const;
+
+    std::vector<byte> elements;
 };
 
-#endif // USER_H
+#endif // MATHVECTOR_H

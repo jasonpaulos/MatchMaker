@@ -19,31 +19,40 @@
  * THE SOFTWARE.
  */
 
-#ifndef USER_H
-#define USER_H
-
-#include <QString>
+#include <cmath>
+#include <cassert>
 #include "MathVector.h"
 
-/* This class represents a user and his or her answers. The answers are stored
- * as a Point because the matching algorithm we use is centered around linear
- * algebra. The smaller the "distance" between two points from different Users are,
- * the more likely those users will be matched up. MatchEngine uses this theory
- * to calculate the matches based on the "distance" between Users' answers.
- */
-class User{
-public:
-    explicit User(const QString &name, Gender gender, unsigned int dimensions);
+MathVector::MathVector(unsigned int dimensions):
+    elements(dimensions, 0)
+{ }
 
-    /* This should only be called if a grade field is present in DatabaseSetup,
-     * otherwise, the return value will be undefined.
-     */
-    Grade getGrade() const;
+MathVector::MathVector(const std::vector<byte> &v):
+    elements(v)
+{ }
 
-    QString name;
-    Gender gender;
-    MathVector answers;
-    std::vector<const User*> matches;
-};
+MathVector::MathVector(const MathVector &v):
+    elements(v.elements)
+{ }
 
-#endif // USER_H
+
+unsigned int MathVector::getDimensions() const{
+    return static_cast<unsigned int>(elements.size());
+}
+
+float MathVector::getDistance(const MathVector &v) const{
+    return sqrt(getDistanceSquared(v));
+}
+
+float MathVector::getDistanceSquared(const MathVector &v) const{
+    unsigned int dimensions = getDimensions();
+    assert(dimensions == v.getDimensions());
+
+    float rawDistance = 0.0F;
+
+    for(unsigned int i = 0; i < dimensions; ++i){
+        rawDistance += pow(elements.at(i) - v.elements.at(i), 2);
+    }
+
+    return rawDistance;
+}

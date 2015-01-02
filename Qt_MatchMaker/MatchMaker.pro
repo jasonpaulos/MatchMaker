@@ -33,13 +33,13 @@ SOURCES +=  main.cpp\
     DatabaseSQLite.cpp \
     DatabaseSetup.cpp \
     StepWidget.cpp \
-    Point.cpp \
     User.cpp \
     MatchMaker.cpp \
     DbFieldWidget.cpp \
     DatabaseManager.cpp \
     MatchEngine.cpp \
-    PrintEngine.cpp
+    PrintEngine.cpp \
+    MathVector.cpp
 
 HEADERS  += MainWindow.h \
     DatabaseDialog.h \
@@ -52,14 +52,14 @@ HEADERS  += MainWindow.h \
     DatabaseSQLite.h \
     DatabaseSetup.h \
     StepWidget.h \
-    Point.h \
     User.h \
     Environment.h \
     MatchMaker.h \
     DbFieldWidget.h \
     DatabaseManager.h \
     MatchEngine.h \
-    PrintEngine.h
+    PrintEngine.h \
+    MathVector.h
 
 FORMS    += MainWindow.ui \
     DatabaseDialog.ui \
