@@ -32,19 +32,23 @@ class MathVector{
 public:
     explicit MathVector(unsigned int dimensions);
     explicit MathVector(const std::vector<byte> &v);
+    explicit MathVector(std::vector<byte> &&v);
     MathVector(const MathVector &v);
+    MathVector(MathVector &&v);
 
     unsigned int getDimensions() const;
 
-    /* Calculates the distance between two points using linear algebra.
+    /* Calculates the magnitude of the vector
      */
-    float getDistance(const MathVector &v) const;
+    float getMagnitude() const;
 
-    /* Calculates the squared distance between two points using linear
-     * algebra. This method doesn't call sqrt() like the above one,
-     * so it is faster.
+    /* Calculates the squared magnitude of the vector.
+     * This method doesn't call sqrt() like the one above, so it is faster.
      */
-    float getDistanceSquared(const MathVector &v) const;
+    float getMagnitudeSquared() const;
+
+    MathVector operator+(const MathVector &v) const;
+    MathVector operator-(const MathVector &v) const;
 
     std::vector<byte> elements;
 };

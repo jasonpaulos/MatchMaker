@@ -20,6 +20,7 @@
  */
 
 #include <cmath>
+#include <algorithm>
 #include <cassert>
 #include "MathVector.h"
 
@@ -31,28 +32,52 @@ MathVector::MathVector(const std::vector<byte> &v):
     elements(v)
 { }
 
+MathVector::MathVector(std::vector<byte> &&v):
+    elements(std::move(v))
+{ }
+
 MathVector::MathVector(const MathVector &v):
     elements(v.elements)
 { }
 
+MathVector::MathVector(MathVector &&v):
+    elements(std::move(v.elements))
+{ }
 
 unsigned int MathVector::getDimensions() const{
     return static_cast<unsigned int>(elements.size());
 }
 
-float MathVector::getDistance(const MathVector &v) const{
-    return sqrt(getDistanceSquared(v));
+float MathVector::getMagnitude() const{
+    return sqrt(getMagnitudeSquared());
 }
 
-float MathVector::getDistanceSquared(const MathVector &v) const{
+float MathVector::getMagnitudeSquared() const{
+    float rawMag = 0.0F;
+
+    for(unsigned int e : elements){
+        rawMag += e * e;
+    }
+
+    return rawMag;
+}
+
+MathVector MathVector::operator+(const MathVector &v) const{
     unsigned int dimensions = getDimensions();
     assert(dimensions == v.getDimensions());
 
-    float rawDistance = 0.0F;
+    MathVector sum(dimensions);
+    std::transform(elements.begin(), elements.end(), v.elements.begin(), sum.elements.begin(), std::plus<unsigned int>());
 
-    for(unsigned int i = 0; i < dimensions; ++i){
-        rawDistance += pow(elements.at(i) - v.elements.at(i), 2);
-    }
+    return sum;
+}
 
-    return rawDistance;
+MathVector MathVector::operator-(const MathVector &v) const{
+    unsigned int dimensions = getDimensions();
+    assert(dimensions == v.getDimensions());
+
+    MathVector diff(dimensions);
+    std::transform(elements.begin(), elements.end(), v.elements.begin(), diff.elements.begin(), std::minus<unsigned int>());
+
+    return diff;
 }

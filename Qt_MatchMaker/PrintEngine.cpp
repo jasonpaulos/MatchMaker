@@ -137,7 +137,7 @@ void PrintEngine::printPage(){
         const User *user(users[index]);
 
         if(user){
-            const std::vector<const User*> &matches(user->matches);
+            const std::map<float, const User*> &matches(user->matches);
 
             painter->setFont(textFont);
 
@@ -164,12 +164,14 @@ void PrintEngine::printPage(){
 
             unsigned int rank = 0;
             for(auto m = matches.begin(); m != matches.end(); ++m){
-                if(const User *match = *m){
+                if(const User *match = m->second){
                     names += QString::number(++rank) + ".\t" + match->name + "\n";
 
                     if(hasGrade){
                         grades += getGradeText(match->getGrade()) + "\n";
                     }
+
+                    //TODO: also print out match percentage
                 }
             }
 

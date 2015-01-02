@@ -45,6 +45,12 @@ class MatchEngine : public QObject{
 public:
     explicit MatchEngine(std::vector<User> *input, const std::vector<User> *choices, int matchAmount);
 
+    /* The "likelihood" of two users to be matched based on their vector data.
+     * Output will be [0.0F, 1.0F)
+     * The lower this is, the more likely that they will be matched.
+     */
+    float getMatchLikelihood(const MathVector &a, const MathVector &b);
+
 public slots:
     void setup();
     void startMatching();

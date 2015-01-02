@@ -26,7 +26,7 @@ MatchEngine::MatchEngine(std::vector<User> *input, const std::vector<User> *choi
     input(*input),
     rawChoices(*choices),
     index(0),
-    matchesPerSecond(50), //Might want to modify this based on rawChoices.size()
+    matchesPerSecond(50), //Might want to modify this based on rawChoices.size(), as match() is O(N) with that
     matchAmount(matchAmount)
 {
     connect(this, SIGNAL(pleaseSetup()), this, SLOT(setup()));
@@ -34,6 +34,9 @@ MatchEngine::MatchEngine(std::vector<User> *input, const std::vector<User> *choi
     connect(this, SIGNAL(pleaseStopMatching()), this, SLOT(stopMatching()));
 }
 
+float MatchEngine::getMatchLikelihood(const MathVector &a, const MathVector &b){
+    return (a - b).getMagnitude()/(a.getMagnitude() + b.getMagnitude());
+}
 
 void MatchEngine::setup(){
     timer.reset(new QTimer(this));
@@ -54,14 +57,17 @@ void MatchEngine::match(){
 
         sortedChoices.clear();
 
-        for(auto c = rawChoices.begin(); c != rawChoices.end(); ++c){
-            sortedChoices[user.answers.getDistanceSquared(c->answers)] = &(*c);
+        for(const User &choice : rawChoices){
+            //It's a little dangerous to store a pointer to a value stored in a vector,
+            //so we have to make sure that the vector isn't resized after this.
+            //This actually helps a little because it ensures the user vector won't be modified after matching.
+            sortedChoices.insert(std::make_pair(getMatchLikelihood(user.answers, choice.answers), &choice));
         }
 
-        user.matches.resize(matchAmount, nullptr);
         unsigned int m = 0;
-        for(auto match = sortedChoices.cbegin(); m < matchAmount && match != sortedChoices.cend(); ++match){
-            user.matches[m++] = match->second;
+        for(auto match = sortedChoices.cbegin(); m < matchAmount && match != sortedChoices.cend(); ++match, ++m){
+            //Turning likelihood (match->first) to a percentage
+            user.matches.insert(std::make_pair(100.0F - 100.0F * match->first, match->second));
         }
 
         emit progress(++index);
