@@ -45,8 +45,7 @@ public:
 
     QString getPdfSavePath();
     void printToPdf();
-    void maleQuery(QSqlQuery &query);
-    void femaleQuery(QSqlQuery &query);
+    void userQuery(QSqlQuery *query, Gender gen, std::vector<User> &users);
 
 private slots:
     void on_selectDatabase_clicked();

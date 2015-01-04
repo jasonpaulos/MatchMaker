@@ -37,7 +37,7 @@ DbFieldWidget::DbFieldWidget(DatabaseDialog *parent):
 {
     ui->setupUi(this);
 
-    connect(this, SIGNAL(signalProcessQuery(QSqlQuery)), this, SLOT(slotProcessQuery(QSqlQuery)));
+    connect(this, SIGNAL(signalAddColumns(QStringList)), this, SLOT(slotAddColumns(QStringList)));
 
     dialog->setButtonState(DatabaseDialog::BUTTON_BACK, true);
     dialog->setButtonState(DatabaseDialog::BUTTON_NEXT, false);
@@ -46,8 +46,9 @@ DbFieldWidget::DbFieldWidget(DatabaseDialog *parent):
     DatabaseManager *dm = MatchMaker::instance->dbManager;
 
     dm->queryConnection(CONNECTION, dialog->db->getColumnQuery(dialog->dbSetup.getTable()),
-    [this](QSqlQuery query){
-        emit signalProcessQuery(query);
+    [this](QSqlQuery *query){
+        //emit signalProcessQuery(query);
+        processQuery(query);
     });
 }
 
@@ -75,7 +76,7 @@ void DbFieldWidget::saveData(){
 
 bool DbFieldWidget::canFinish(){
 
-    //Is there a first, middle, or last name? Ifso, is at least one question field selected?
+    //Is there a first, middle, or last name? If so, is at least one question field selected?
     if(ui->firstBox->currentIndex() > 0 || ui->middleBox->currentIndex() > 0 || ui->lastBox->currentIndex() > 0){
         for(int i = 0; i < questionFields.size(); ++i){
             if(questionFields.at(i)->isChecked()){
@@ -103,45 +104,49 @@ void DbFieldWidget::showError(const QString &error){
     );
 }
 
-void DbFieldWidget::slotProcessQuery(QSqlQuery query){
-    if(!query.lastError().isValid()){
+void DbFieldWidget::processQuery(QSqlQuery *query){
+    if(query->exec()){
         QStringList fields;
-        QSqlRecord rec(query.record());
+        QSqlRecord rec(query->record());
 
         if(rec.count() > 0){
             for(int i = 0; i < rec.count(); ++i){
                 fields << rec.fieldName(i);
             }
 
-            ui->firstBox->addItems(fields);
-            ui->middleBox->addItems(fields);
-            ui->lastBox->addItems(fields);
-            ui->gradeBox->addItems(fields);
-            ui->genderBox->addItems(fields);
-
-            QVBoxLayout *layout = new QVBoxLayout();
-            QWidget *holder = new QWidget(ui->questionScrollArea);
-            holder->setLayout(layout);
-
-            questionFields.resize(fields.size());
-
-            for(int i = 0; i < fields.size(); ++i){
-                QCheckBox *box = new QCheckBox(holder);
-                box->setText(fields.at(i));
-                questionFields[i] = box;
-
-                layout->addWidget(box);
-            }
-
-            ui->questionScrollArea->setWidget(holder);
-
-            dialog->setButtonState(DatabaseDialog::BUTTON_FINISH, true);
+            emit signalAddColumns(fields);
         }else{
             showError("There are no fields in this table");
         }
     }else{
-        showError(query.lastError().text());
+        showError(query->lastError().text());
     }
+}
+
+void DbFieldWidget::slotAddColumns(QStringList columns){
+    ui->firstBox->addItems(columns);
+    ui->middleBox->addItems(columns);
+    ui->lastBox->addItems(columns);
+    ui->gradeBox->addItems(columns);
+    ui->genderBox->addItems(columns);
+
+    QVBoxLayout *layout = new QVBoxLayout();
+    QWidget *holder = new QWidget(ui->questionScrollArea);
+    holder->setLayout(layout);
+
+    questionFields.resize(columns.size());
+
+    for(int i = 0; i < columns.size(); ++i){
+        QCheckBox *box = new QCheckBox(holder);
+        box->setText(columns.at(i));
+        questionFields[i] = box;
+
+        layout->addWidget(box);
+    }
+
+    ui->questionScrollArea->setWidget(holder);
+
+    dialog->setButtonState(DatabaseDialog::BUTTON_FINISH, true);
 }
 
 void DbFieldWidget::on_questionSelect_clicked(){

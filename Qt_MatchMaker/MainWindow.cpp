@@ -94,68 +94,32 @@ void MainWindow::printToPdf(){
     emit printEngine->pleaseStartPrinting();
 }
 
-void MainWindow::maleQuery(QSqlQuery &query){
-    if(!query.lastError().isValid()){
-
-        query.setForwardOnly(true);
-
-        int dimensions = matchMaker.dbSetup.getQuestions().size() + matchMaker.dbSetup.hasGrade();
+void MainWindow::userQuery(QSqlQuery *query, Gender gen, std::vector<User> &users){
+    if(query->exec()){
+        unsigned int dimensions = matchMaker.dbSetup.getQuestions().size() + matchMaker.dbSetup.hasGrade();
         bool hasFirst = matchMaker.dbSetup.hasFirstName(), hasMiddle = matchMaker.dbSetup.hasMiddleName(), hasLast = matchMaker.dbSetup.hasLastName();
 
-        while(query.next()){
+        while(query->next()){
             int i = 0;
-            QString first(hasFirst ? query.value(i++).toString() : ""), middle(hasMiddle ? query.value(i++).toString(): ""), last(hasLast ? query.value(i++).toString() : "");
+            QString first(hasFirst ? query->value(i++).toString() : ""), middle(hasMiddle ? query->value(i++).toString(): ""), last(hasLast ? query->value(i++).toString() : "");
 
             User user(
                         first + (middle.isEmpty() ? "" : " ") +
                         middle + (last.isEmpty() ? "" : " ") +
                         last,
-                        Gender::MALE,
+                        gen,
                         dimensions
             );
 
-            for(int a = 0; a < dimensions; ++a){
-                user.answers.elements[a] = query.value(i++).toInt();//TODO: check for error?
+            for(unsigned int a = 0; a < dimensions; ++a){
+                user.answers.elements[a] = query->value(i++).toInt();//TODO: check for error?
             }
 
-            matchMaker.male.push_back(user);
+            users.push_back(user);
         }
 
     }else{
-        emit signalShowError(query.lastError().text());
-    }
-}
-
-void MainWindow::femaleQuery(QSqlQuery &query){
-    if(!query.lastError().isValid()){
-
-        query.setForwardOnly(true);
-
-        int dimensions = matchMaker.dbSetup.getQuestions().size() + matchMaker.dbSetup.hasGrade();
-        bool hasFirst = matchMaker.dbSetup.hasFirstName(), hasMiddle = matchMaker.dbSetup.hasMiddleName(), hasLast = matchMaker.dbSetup.hasLastName();
-
-        while(query.next()){
-            int i = 0;
-            QString first(hasFirst ? query.value(i++).toString() : ""), middle(hasMiddle ? query.value(i++).toString(): ""), last(hasLast ? query.value(i++).toString() : "");
-
-            User user(
-                        first + (middle.isEmpty() ? "" : " ") +
-                        middle + (last.isEmpty() ? "" : " ") +
-                        last,
-                        Gender::FEMALE,
-                        dimensions
-            );
-
-            for(int a = 0; a < dimensions; ++a){
-                user.answers.elements[a] = query.value(i++).toInt();//TODO: check for error?
-            }
-
-            matchMaker.female.push_back(user);
-        }
-
-        emit signalUsersLoaded();
-    }else{
-        emit signalShowError(query.lastError().text());
+        emit signalShowError(query->lastError().text());
     }
 }
 
@@ -210,12 +174,15 @@ void MainWindow::on_start_clicked(){
         query += "FROM " + matchMaker.dbSetup.getTable() + " WHERE ";
 
         matchMaker.dbManager->queryConnection(CONNECTION, query + matchMaker.dbSetup.getGender() + " = " + QString::number(Gender::MALE),
-        [this](QSqlQuery query){
-            maleQuery(query);
-        });
-        matchMaker.dbManager->queryConnection(CONNECTION, query + matchMaker.dbSetup.getGender() + " = " + QString::number(Gender::FEMALE),
-        [this](QSqlQuery query){
-            femaleQuery(query);
+        [this, query](QSqlQuery *maleQuery){
+            userQuery(maleQuery, Gender::MALE, matchMaker.male);
+
+            matchMaker.dbManager->queryConnection(CONNECTION, query + matchMaker.dbSetup.getGender() + " = " + QString::number(Gender::FEMALE),
+            [this](QSqlQuery *femaleQuery){
+                userQuery(femaleQuery, Gender::FEMALE, matchMaker.female);
+
+                emit signalUsersLoaded();
+            });
         });
     }
 }
@@ -378,8 +345,8 @@ void MainWindow::slotUsersLoaded(){
     ui->usersProgress->setValue(1);
     ui->usersInfo->setText("Done");
 
-    ui->maleProgress->setMaximum((int)matchMaker.male.size());
-    ui->femaleProgress->setMaximum((int)matchMaker.female.size());
+    ui->maleProgress->setMaximum(static_cast<int>(matchMaker.male.size()));
+    ui->femaleProgress->setMaximum(static_cast<int>(matchMaker.female.size()));
     ui->totalProgress->setMaximum(ui->maleProgress->maximum() + ui->femaleProgress->maximum());
     ui->printingProgress->setMaximum(ui->totalProgress->maximum());
 

@@ -117,10 +117,10 @@ void DatabaseManager::slotRemoveConnection(QString connection){
 
 void DatabaseManager::slotQuery(QString connection, QString query, QueryProcess process){
     QSqlQuery databaseQuery(QSqlDatabase::database(connection));
+    databaseQuery.setForwardOnly(true);
+    databaseQuery.prepare(query);
 
-    databaseQuery.exec(query);
-
-    process(databaseQuery);
+    process(&databaseQuery);
 }
 
 void DatabaseManager::slotTables(QString connection, TableProcess process, ErrorProcess error){

@@ -30,7 +30,7 @@
 #include "DatabaseSQLite.h"
 
 typedef std::function<void (QString)> ErrorProcess;
-typedef std::function<void (QSqlQuery)> QueryProcess;
+typedef std::function<void (QSqlQuery*)> QueryProcess;
 typedef std::function<void (QStringList)> TableProcess;
 
 /* These help Qt pass these argument types to signals and slots.

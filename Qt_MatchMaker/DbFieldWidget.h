@@ -47,11 +47,13 @@ public:
     virtual bool canFinish();
     void showError(const QString &error);
 
+    void processQuery(QSqlQuery *query);
+
 public slots:
-    void slotProcessQuery(QSqlQuery query);
+    void slotAddColumns(QStringList columns);
 
 signals:
-    void signalProcessQuery(QSqlQuery query);
+    void signalAddColumns(QStringList columns);
 
 private slots:
     void on_questionSelect_clicked();
