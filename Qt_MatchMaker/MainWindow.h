@@ -44,6 +44,7 @@ public:
     ~MainWindow();
 
     QString getPdfSavePath();
+    QString getPdfPageTitle();
     void printToPdf();
     void userQuery(QSqlQuery *query, Gender gen, std::vector<User> &users);
 

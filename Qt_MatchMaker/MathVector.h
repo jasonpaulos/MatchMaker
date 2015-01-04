@@ -28,13 +28,14 @@
 /* A basic math vector class that can be initialized to any number of
  * dimensions. See User.h for implementation.
  */
+template <typename E>
 class MathVector{
 public:
     explicit MathVector(unsigned int dimensions);
-    explicit MathVector(const std::vector<byte> &v);
-    explicit MathVector(std::vector<byte> &&v);
-    MathVector(const MathVector &v);
-    MathVector(MathVector &&v);
+    explicit MathVector(const std::vector<E> &v);
+    explicit MathVector(std::vector<E> &&v);
+    MathVector(const MathVector<E> &v);
+    MathVector(MathVector<E> &&v);
 
     unsigned int getDimensions() const;
 
@@ -47,10 +48,12 @@ public:
      */
     float getMagnitudeSquared() const;
 
-    MathVector operator+(const MathVector &v) const;
-    MathVector operator-(const MathVector &v) const;
+    MathVector operator+(const MathVector<E> &v) const;
+    MathVector operator-(const MathVector<E> &v) const;
 
-    std::vector<byte> elements;
+    std::vector<E> elements;
 };
+
+typedef MathVector<short> MathVec;
 
 #endif // MATHVECTOR_H

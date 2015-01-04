@@ -22,7 +22,6 @@
 #ifndef USER_H
 #define USER_H
 
-#include <map>
 #include <QString>
 #include "MathVector.h"
 
@@ -43,8 +42,8 @@ public:
 
     QString name;
     Gender gender;
-    MathVector answers;
-    std::map<float, const User*> matches;
+    MathVec answers;
+    std::vector<std::pair<float, const User*>> matches;
 };
 
 #endif // USER_H

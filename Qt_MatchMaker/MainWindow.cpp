@@ -81,6 +81,10 @@ QString MainWindow::getPdfSavePath(){
     return ui->pdfInfo->text();
 }
 
+QString MainWindow::getPdfPageTitle(){
+    return ui->titleEdit->text();
+}
+
 void MainWindow::printToPdf(){
     printEngine = new PrintEngine(this);
 
@@ -138,6 +142,8 @@ void MainWindow::on_start_clicked(){
     ui->stop->setEnabled(false);
     ui->clear->setEnabled(false);
 
+    //TODO: check that the pdf file is a valid file name
+
     if(partialStop){
         if(!isMaleDone){
             emit maleEngine->pleaseStartMatching();
@@ -151,6 +157,8 @@ void MainWindow::on_start_clicked(){
             emit printEngine->pleaseStartPrinting();
         }
     }else{
+        isMaleDone = isFemaleDone = false;
+
         ui->inputGroup->setEnabled(false);
         ui->outputGroup->setEnabled(false);
 
@@ -355,10 +363,10 @@ void MainWindow::slotUsersLoaded(){
     ui->totalInfo->setText("0/" + QString::number(ui->totalProgress->maximum()));
     ui->printingInfo->setText(ui->totalInfo->text());
 
-    maleEngine = new MatchEngine(&matchMaker.male, &matchMaker.female, ui->matchAmountSpinner->value());
+    maleEngine = new MatchEngine(&matchMaker.male, &matchMaker.female, ui->matchAmountSpinner->value(), static_cast<float>(ui->scalarSpinBox->value()));
     maleEngine->moveToThread(maleThread);
 
-    femaleEngine = new MatchEngine(&matchMaker.female, &matchMaker.male, ui->matchAmountSpinner->value());
+    femaleEngine = new MatchEngine(&matchMaker.female, &matchMaker.male, ui->matchAmountSpinner->value(), static_cast<float>(ui->scalarSpinBox->value()));
     femaleEngine->moveToThread(femaleThread);
 
     connect(maleEngine, SIGNAL(progress(int)), this, SLOT(maleProgress(int)));

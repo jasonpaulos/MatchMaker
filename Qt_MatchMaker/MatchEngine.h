@@ -43,13 +43,13 @@ class MatchEngine : public QObject{
     Q_OBJECT
 
 public:
-    explicit MatchEngine(std::vector<User> *input, const std::vector<User> *choices, int matchAmount);
+    explicit MatchEngine(std::vector<User> *input, const std::vector<User> *choices, int matchAmount, float percentageScalar);
 
     /* The "likelihood" of two users to be matched based on their vector data.
-     * Output will be [0.0F, 1.0F)
-     * The lower this is, the more likely that they will be matched.
+     * Output should be [0.0F, 1.0F]
+     * The higher this is, the more likely that they will be matched.
      */
-    float getMatchLikelihood(const MathVector &a, const MathVector &b);
+    float getMatchLikelihood(const MathVec &a, const MathVec &b);
 
 public slots:
     void setup();
@@ -70,15 +70,9 @@ private:
     std::vector<User> &input;
     const std::vector<User> &rawChoices;
 
-    /* This map is cleared for every match and is then filled with the (squared) "distance" between the
-     * current user from input and the potential matches from rawChoices. This way we can take advantage
-     * of the sorting system in std::map because the potential matches who are the "closest" will occupy
-     * the first positions in the map.
-     */
-    std::map<float, const User*> sortedChoices;
-
 public:
     const unsigned int matchesPerSecond, matchAmount;
+    const float percentageScalar;
 };
 
 #endif // MATCHENGINE_H

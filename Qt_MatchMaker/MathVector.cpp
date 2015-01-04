@@ -24,60 +24,73 @@
 #include <cassert>
 #include "MathVector.h"
 
-MathVector::MathVector(unsigned int dimensions):
+template <typename E>
+MathVector<E>::MathVector(unsigned int dimensions):
     elements(dimensions, 0)
 { }
 
-MathVector::MathVector(const std::vector<byte> &v):
+template <typename E>
+MathVector<E>::MathVector(const std::vector<E> &v):
     elements(v)
 { }
 
-MathVector::MathVector(std::vector<byte> &&v):
+template <typename E>
+MathVector<E>::MathVector(std::vector<E> &&v):
     elements(std::move(v))
 { }
 
-MathVector::MathVector(const MathVector &v):
+template <typename E>
+MathVector<E>::MathVector(const MathVector<E> &v):
     elements(v.elements)
 { }
 
-MathVector::MathVector(MathVector &&v):
+template <typename E>
+MathVector<E>::MathVector(MathVector<E> &&v):
     elements(std::move(v.elements))
 { }
 
-unsigned int MathVector::getDimensions() const{
+template <typename E>
+unsigned int MathVector<E>::getDimensions() const{
     return static_cast<unsigned int>(elements.size());
 }
 
-float MathVector::getMagnitude() const{
+template <typename E>
+float MathVector<E>::getMagnitude() const{
     return sqrt(getMagnitudeSquared());
 }
 
-float MathVector::getMagnitudeSquared() const{
+template <typename E>
+float MathVector<E>::getMagnitudeSquared() const{
     float rawMag = 0.0F;
 
-    for(unsigned int e : elements){
+    for(E e : elements){
         rawMag += e * e;
     }
 
     return rawMag;
 }
 
-MathVector MathVector::operator+(const MathVector &v) const{
+template <typename E>
+MathVector<E> MathVector<E>::operator+(const MathVector<E> &v) const{
     unsigned int dimensions = getDimensions();
     assert(dimensions == v.getDimensions());
 
-    MathVector sum(dimensions);
-    std::transform(elements.begin(), elements.end(), v.elements.begin(), sum.elements.begin(), std::plus<unsigned int>());
+    MathVector<E> sum(dimensions);
+    std::transform(elements.begin(), elements.end(), v.elements.begin(), sum.elements.begin(), std::plus<E>());
 
     return sum;
 }
 
-MathVector MathVector::operator-(const MathVector &v) const{
+template <typename E>
+MathVector<E> MathVector<E>::operator-(const MathVector<E> &v) const{
     unsigned int dimensions = getDimensions();
     assert(dimensions == v.getDimensions());
 
-    MathVector diff(dimensions);
-    std::transform(elements.begin(), elements.end(), v.elements.begin(), diff.elements.begin(), std::minus<unsigned int>());
+    MathVector<E> diff(dimensions);
+    std::transform(elements.begin(), elements.end(), v.elements.begin(), diff.elements.begin(), std::minus<E>());
 
     return diff;
 }
+
+template class MathVector<short>;
+

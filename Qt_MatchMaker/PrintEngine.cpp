@@ -25,6 +25,7 @@
 PrintEngine::PrintEngine(MainWindow *parent):
     hasGrade(parent->matchMaker.dbSetup.hasGrade()),
     saveTo(parent->getPdfSavePath()),
+    pageTitle(parent->getPdfPageTitle()),
     timer(nullptr),
     printer(nullptr),
     painter(nullptr),
@@ -100,12 +101,16 @@ void PrintEngine::setup(){
 
     nameHeaderRect = pageRect;
     nameHeaderRect.setY(titleRect.y() + titleRect.height());
-    nameHeaderRect.setWidth(pageRect.width() * 7/10);
+    nameHeaderRect.setWidth(pageRect.width() * 55/100);
     nameHeaderRect.setHeight(pageRect.height()/20);
 
     gradeHeaderRect = nameHeaderRect;
     gradeHeaderRect.setX(nameHeaderRect.x() + nameHeaderRect.width());
-    gradeHeaderRect.setWidth(pageRect.width() - nameHeaderRect.width());
+    gradeHeaderRect.setWidth(pageRect.width() * 25/100);
+
+    percentageHeaderRect = gradeHeaderRect;
+    percentageHeaderRect.setX(gradeHeaderRect.x() + gradeHeaderRect.width());
+    percentageHeaderRect.setWidth(pageRect.width() - nameHeaderRect.width() - gradeHeaderRect.width());
 
     nameRect = nameHeaderRect;
     nameRect.setY(nameHeaderRect.y() + nameHeaderRect.height());
@@ -114,6 +119,10 @@ void PrintEngine::setup(){
     gradeRect = nameRect;
     gradeRect.setX(gradeHeaderRect.x());
     gradeRect.setWidth(gradeHeaderRect.width());
+
+    percentageRect = gradeRect;
+    percentageRect.setX(percentageHeaderRect.x());
+    percentageRect.setWidth(percentageHeaderRect.width());
 
     painter.reset(new QPainter(printer.data()));
     painter->setPen(QPen(QBrush(Qt::black), pageRect.height()/500));
@@ -137,14 +146,12 @@ void PrintEngine::printPage(){
         const User *user(users[index]);
 
         if(user){
-            const std::map<float, const User*> &matches(user->matches);
-
-            painter->setFont(textFont);
-
-            painter->drawText(headerRect.marginsRemoved(textMargins), Qt::AlignVCenter | Qt::AlignLeft, "OC Mingle Matches");
-            painter->drawText(headerRect.marginsRemoved(textMargins), Qt::AlignVCenter | Qt::AlignRight, "Feburary, 2014");
+            const std::vector<std::pair<float, const User*>> &matches(user->matches);
 
             painter->setFont(titleFont);
+
+            painter->drawText(headerRect.marginsRemoved(textMargins), Qt::AlignVCenter | Qt::AlignLeft, pageTitle);
+            //painter->drawText(headerRect.marginsRemoved(textMargins), Qt::AlignVCenter | Qt::AlignRight, "Feburary, 2014");
 
             painter->drawText(titleRect.marginsRemoved(textMargins), Qt::AlignVCenter | Qt::AlignLeft, "Matches for:");
             painter->drawText(titleRect.marginsRemoved(textMargins), Qt::AlignVCenter | Qt::AlignRight, user->name + (hasGrade ? ", " + getGradeText(user->getGrade()) : ""));
@@ -155,12 +162,16 @@ void PrintEngine::printPage(){
             painter->drawRect(gradeHeaderRect);
             painter->drawText(gradeHeaderRect.marginsRemoved(textMargins), Qt::AlignBottom | Qt::AlignLeft, "Grade");
 
+            painter->drawRect(percentageHeaderRect);
+            painter->drawText(percentageHeaderRect.marginsRemoved(textMargins), Qt::AlignBottom | Qt::AlignLeft, "Match %");
+
             painter->drawRect(nameRect);
             painter->drawRect(gradeRect);
+            painter->drawRect(percentageRect);
 
             painter->setFont(textFont);
 
-            QString names, grades;
+            QString names, grades, percents;
 
             unsigned int rank = 0;
             for(auto m = matches.begin(); m != matches.end(); ++m){
@@ -171,12 +182,13 @@ void PrintEngine::printPage(){
                         grades += getGradeText(match->getGrade()) + "\n";
                     }
 
-                    //TODO: also print out match percentage
+                    percents += QString::number(m->first, 'f', 1) + "%\n";
                 }
             }
 
             painter->drawText(nameRect.marginsRemoved(textMargins), Qt::AlignTop | Qt::AlignLeft, names);
             painter->drawText(gradeRect.marginsRemoved(textMargins), Qt::AlignTop | Qt::AlignLeft, grades);
+            painter->drawText(percentageRect.marginsRemoved(textMargins), Qt::AlignTop | Qt::AlignHCenter, percents);
 
             painter->drawRect(footerRect);
 

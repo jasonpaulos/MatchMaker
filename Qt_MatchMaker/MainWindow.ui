@@ -45,10 +45,16 @@
        <string>Input</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_3">
-       <item row="0" column="0">
-        <widget class="QLabel" name="databaseTitle">
-         <property name="text">
-          <string>Database:</string>
+       <item row="7" column="0">
+        <widget class="QWidget" name="inputSpacer" native="true">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
         </widget>
        </item>
@@ -71,6 +77,13 @@
          </property>
          <property name="wordWrap">
           <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="databaseTitle">
+         <property name="text">
+          <string>Database:</string>
          </property>
         </widget>
        </item>
@@ -97,23 +110,10 @@
          </property>
         </widget>
        </item>
-       <item row="6" column="0">
+       <item row="8" column="0">
         <widget class="QPushButton" name="selectDatabase">
          <property name="text">
           <string>Select Database</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="0">
-        <widget class="QWidget" name="inputSpacer" native="true">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
          </property>
         </widget>
        </item>
@@ -127,6 +127,26 @@
          </property>
          <property name="value">
           <number>10</number>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QDoubleSpinBox" name="scalarSpinBox">
+         <property name="minimum">
+          <double>1.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>100000.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>5.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="scalarLabel">
+         <property name="text">
+          <string>Percentage Scalar:</string>
          </property>
         </widget>
        </item>
@@ -345,10 +365,17 @@
        <string>Output</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_4">
-       <item row="0" column="0">
-        <widget class="QLabel" name="pdfTitle">
+       <item row="3" column="0">
+        <widget class="QLineEdit" name="titleEdit">
          <property name="text">
-          <string>Print to PDF:</string>
+          <string>MatchMaker Matches</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QPushButton" name="selectPdf">
+         <property name="text">
+          <string>Select PDF</string>
          </property>
         </widget>
        </item>
@@ -365,7 +392,14 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
+       <item row="0" column="0">
+        <widget class="QLabel" name="pdfTitle">
+         <property name="text">
+          <string>Print to PDF:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
         <widget class="QWidget" name="outputSpacer" native="true">
          <property name="enabled">
           <bool>false</bool>
@@ -378,10 +412,10 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="0">
-        <widget class="QPushButton" name="selectPdf">
+       <item row="2" column="0">
+        <widget class="QLabel" name="titleTitle">
          <property name="text">
-          <string>Select PDF</string>
+          <string>Page Title:</string>
          </property>
         </widget>
        </item>

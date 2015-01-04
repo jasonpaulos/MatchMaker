@@ -60,11 +60,12 @@ signals:
 private:
     bool hasGrade;
     QString saveTo;
+    QString pageTitle;
     QScopedPointer<QTimer> timer;
     QScopedPointer<QPrinter> printer;
     QScopedPointer<QPainter> painter;
     QFont titleFont, textFont;
-    QRect pageRect, headerRect, titleRect, nameRect, nameHeaderRect, gradeRect, gradeHeaderRect, footerRect;
+    QRect pageRect, headerRect, titleRect, nameRect, nameHeaderRect, gradeRect, gradeHeaderRect, percentageHeaderRect, percentageRect, footerRect;
     QMargins textMargins;
     unsigned int index;
     std::vector<const User*> users;
