@@ -363,10 +363,13 @@ void MainWindow::slotUsersLoaded(){
     ui->totalInfo->setText("0/" + QString::number(ui->totalProgress->maximum()));
     ui->printingInfo->setText(ui->totalInfo->text());
 
-    maleEngine = new MatchEngine(&matchMaker.male, &matchMaker.female, ui->matchAmountSpinner->value(), static_cast<float>(ui->scalarSpinBox->value()));
+    MathVec max(std::vector<float>(matchMaker.dbSetup.getQuestions().size(), static_cast<float>(ui->rangeSpinBox->value())));
+    float mag = max.getMagnitude() + 3; // + 3 because grades are considered questions too
+
+    maleEngine = new MatchEngine(&matchMaker.male, &matchMaker.female, ui->matchAmountSpinner->value(), mag);
     maleEngine->moveToThread(maleThread);
 
-    femaleEngine = new MatchEngine(&matchMaker.female, &matchMaker.male, ui->matchAmountSpinner->value(), static_cast<float>(ui->scalarSpinBox->value()));
+    femaleEngine = new MatchEngine(&matchMaker.female, &matchMaker.male, ui->matchAmountSpinner->value(), mag);
     femaleEngine->moveToThread(femaleThread);
 
     connect(maleEngine, SIGNAL(progress(int)), this, SLOT(maleProgress(int)));

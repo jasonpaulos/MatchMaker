@@ -102,6 +102,9 @@
        </item>
        <item row="3" column="0">
         <widget class="QLabel" name="matchAmountTitle">
+         <property name="toolTip">
+          <string>The number of matches that will be generated for each user.</string>
+         </property>
          <property name="text">
           <string>Number of Top Matches to Calculate:</string>
          </property>
@@ -131,7 +134,7 @@
         </widget>
        </item>
        <item row="6" column="0">
-        <widget class="QDoubleSpinBox" name="scalarSpinBox">
+        <widget class="QDoubleSpinBox" name="rangeSpinBox">
          <property name="minimum">
           <double>1.000000000000000</double>
          </property>
@@ -139,14 +142,22 @@
           <double>100000.000000000000000</double>
          </property>
          <property name="value">
-          <double>5.000000000000000</double>
+          <double>4.000000000000000</double>
          </property>
         </widget>
        </item>
        <item row="5" column="0">
-        <widget class="QLabel" name="scalarLabel">
+        <widget class="QLabel" name="rangeLabel">
+         <property name="toolTip">
+          <string>The numerical range that a user's answers can be.
+Only used for scaling the match percentages.
+For example, if answers could be from 1 to 5, then the range would be 5 - 1 = 4.</string>
+         </property>
          <property name="text">
-          <string>Percentage Scalar:</string>
+          <string>Answer Range:</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -248,7 +259,7 @@
          <item row="0" column="0" colspan="2">
           <widget class="QLabel" name="usersLabel">
            <property name="text">
-            <string>Users:</string>
+            <string>Loading Users:</string>
            </property>
           </widget>
          </item>
@@ -414,6 +425,9 @@
        </item>
        <item row="2" column="0">
         <widget class="QLabel" name="titleTitle">
+         <property name="toolTip">
+          <string>What will be displayed at the top of each user's page of matches.</string>
+         </property>
          <property name="text">
           <string>Page Title:</string>
          </property>

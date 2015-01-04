@@ -21,6 +21,7 @@
 
 #include "MatchEngine.h"
 #include <cmath>
+#include <functional>
 
 MatchEngine::MatchEngine(std::vector<User> *input, const std::vector<User> *choices, int matchAmount, float percentageScalar):
     timer(nullptr),
@@ -56,18 +57,18 @@ void MatchEngine::stopMatching(){
 void MatchEngine::match(){
     if(index < input.size()){
         User &user(input[index]);
-        std::multimap<float, std::pair<float, const User*>> sortedChoices;
+        std::multimap<float, const User*, std::greater<float>> sortedChoices;
 
         for(const User &choice : rawChoices){
             //It's a little dangerous to store a pointer to a value stored in a vector,
             //so we have to make sure that the vector isn't resized after this.
             //This actually helps a little because it ensures the user vector won't be modified after matching.
-            sortedChoices.insert(std::make_pair((user.answers - choice.answers).getMagnitude(), std::make_pair(100.0F * getMatchLikelihood(user.answers, choice.answers), &choice)));
+            sortedChoices.insert(std::make_pair(100.0F * getMatchLikelihood(user.answers, choice.answers), &choice));
         }
 
         unsigned int m = 0;
         for(auto match = sortedChoices.cbegin(); m < matchAmount && match != sortedChoices.cend(); ++match, ++m){
-            user.matches.push_back(match->second);
+            user.matches.push_back(*match);
         }
 
         emit progress(++index);

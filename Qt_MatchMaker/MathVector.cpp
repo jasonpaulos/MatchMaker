@@ -55,12 +55,12 @@ unsigned int MathVector<E>::getDimensions() const{
 }
 
 template <typename E>
-float MathVector<E>::getMagnitude() const{
+E MathVector<E>::getMagnitude() const{
     return sqrt(getMagnitudeSquared());
 }
 
 template <typename E>
-float MathVector<E>::getMagnitudeSquared() const{
+E MathVector<E>::getMagnitudeSquared() const{
     float rawMag = 0.0F;
 
     for(E e : elements){
@@ -92,5 +92,5 @@ MathVector<E> MathVector<E>::operator-(const MathVector<E> &v) const{
     return diff;
 }
 
-template class MathVector<short>;
+template class MathVector<float>;
 

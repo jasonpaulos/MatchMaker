@@ -41,12 +41,12 @@ public:
 
     /* Calculates the magnitude of the vector
      */
-    float getMagnitude() const;
+    E getMagnitude() const;
 
     /* Calculates the squared magnitude of the vector.
      * This method doesn't call sqrt() like the one above, so it is faster.
      */
-    float getMagnitudeSquared() const;
+    E getMagnitudeSquared() const;
 
     MathVector operator+(const MathVector<E> &v) const;
     MathVector operator-(const MathVector<E> &v) const;
@@ -54,6 +54,6 @@ public:
     std::vector<E> elements;
 };
 
-typedef MathVector<short> MathVec;
+typedef MathVector<float> MathVec;
 
 #endif // MATHVECTOR_H

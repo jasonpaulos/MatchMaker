@@ -28,5 +28,5 @@ User::User(const QString &name, Gender gender, unsigned int dimensions):
 { }
 
 Grade User::getGrade() const{
-    return static_cast<Grade>(answers.elements.at(0));
+    return static_cast<Grade>(static_cast<int>(answers.elements.at(0)));
 }
