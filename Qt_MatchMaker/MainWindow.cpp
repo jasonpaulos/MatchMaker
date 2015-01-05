@@ -363,8 +363,9 @@ void MainWindow::slotUsersLoaded(){
     ui->totalInfo->setText("0/" + QString::number(ui->totalProgress->maximum()));
     ui->printingInfo->setText(ui->totalInfo->text());
 
-    MathVec max(std::vector<float>(matchMaker.dbSetup.getQuestions().size(), static_cast<float>(ui->rangeSpinBox->value())));
-    float mag = max.getMagnitude() + 3; // + 3 because grades are considered questions too
+    MathVec max(std::vector<float>(matchMaker.dbSetup.getQuestions().size() + 1, static_cast<float>(ui->rangeSpinBox->value())));
+    max.elements.back() = 3.0F; //3 because one "question" is grade level
+    float mag = max.getMagnitude();
 
     maleEngine = new MatchEngine(&matchMaker.male, &matchMaker.female, ui->matchAmountSpinner->value(), mag);
     maleEngine->moveToThread(maleThread);
