@@ -29,8 +29,8 @@ PrintEngine::PrintEngine(MainWindow *parent):
     timer(nullptr),
     printer(nullptr),
     painter(nullptr),
-    titleFont("sans-serif", 24, 20),
-    textFont("sans-serif", 24),
+    titleFont(parent->getPdfTitleFont()),
+    textFont(parent->getPdfTextFont()),
     index(0),
     pagesPerSecond(50)
 {
@@ -148,28 +148,28 @@ void PrintEngine::printPage(){
         if(user){
             const std::vector<std::pair<float, const User*>> &matches(user->matches);
 
-            painter->setFont(titleFont);
-
-            painter->drawText(headerRect.marginsRemoved(textMargins), Qt::AlignVCenter | Qt::AlignLeft, pageTitle);
-            //painter->drawText(headerRect.marginsRemoved(textMargins), Qt::AlignVCenter | Qt::AlignRight, "Feburary, 2014");
-
-            painter->drawText(titleRect.marginsRemoved(textMargins), Qt::AlignVCenter | Qt::AlignLeft, "Matches for:");
-            painter->drawText(titleRect.marginsRemoved(textMargins), Qt::AlignVCenter | Qt::AlignRight, user->name + (hasGrade ? ", " + getGradeText(user->getGrade()) : ""));
-
             painter->drawRect(nameHeaderRect);
-            painter->drawText(nameHeaderRect.marginsRemoved(textMargins), Qt::AlignBottom | Qt::AlignLeft, "Name");
-
             painter->drawRect(gradeHeaderRect);
-            painter->drawText(gradeHeaderRect.marginsRemoved(textMargins), Qt::AlignBottom | Qt::AlignLeft, "Grade");
-
             painter->drawRect(percentageHeaderRect);
-            painter->drawText(percentageHeaderRect.marginsRemoved(textMargins), Qt::AlignBottom | Qt::AlignLeft, "Match %");
 
             painter->drawRect(nameRect);
             painter->drawRect(gradeRect);
             painter->drawRect(percentageRect);
 
+            painter->drawRect(footerRect);
+
+            painter->setFont(titleFont);
+
+            painter->drawText(headerRect.marginsRemoved(textMargins), Qt::AlignVCenter | Qt::AlignLeft, pageTitle);
+
             painter->setFont(textFont);
+
+            painter->drawText(titleRect.marginsRemoved(textMargins), Qt::AlignVCenter | Qt::AlignLeft, "Matches for:");
+            painter->drawText(titleRect.marginsRemoved(textMargins), Qt::AlignVCenter | Qt::AlignRight, user->name + (hasGrade ? ", " + getGradeText(user->getGrade()) : ""));
+
+            painter->drawText(nameHeaderRect.marginsRemoved(textMargins), Qt::AlignBottom | Qt::AlignLeft, "Name");
+            painter->drawText(gradeHeaderRect.marginsRemoved(textMargins), Qt::AlignBottom | Qt::AlignLeft, "Grade");
+            painter->drawText(percentageHeaderRect.marginsRemoved(textMargins), Qt::AlignBottom | Qt::AlignLeft, "Match %");
 
             QString names, grades, percents;
 
@@ -189,8 +189,6 @@ void PrintEngine::printPage(){
             painter->drawText(nameRect.marginsRemoved(textMargins), Qt::AlignTop | Qt::AlignLeft, names);
             painter->drawText(gradeRect.marginsRemoved(textMargins), Qt::AlignTop | Qt::AlignLeft, grades);
             painter->drawText(percentageRect.marginsRemoved(textMargins), Qt::AlignTop | Qt::AlignHCenter, percents);
-
-            painter->drawRect(footerRect);
 
             if(index + 1 < users.size()){
                 printer->newPage();

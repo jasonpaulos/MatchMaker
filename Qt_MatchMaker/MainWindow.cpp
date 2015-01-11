@@ -75,6 +75,8 @@ MainWindow::~MainWindow(){
 
     delete dialog;
     delete pdfDialog;
+
+    delete ui;
 }
 
 QString MainWindow::getPdfSavePath(){
@@ -83,6 +85,26 @@ QString MainWindow::getPdfSavePath(){
 
 QString MainWindow::getPdfPageTitle(){
     return ui->titleEdit->text();
+}
+
+QFont MainWindow::getPdfTitleFont(){
+    QFont font(ui->titleFontComboBox->currentFont());
+    font.setBold(ui->titleFontStyleBold->isChecked());
+    font.setItalic(ui->titleFontStyleItalic->isChecked());
+    font.setUnderline(ui->titleFontStyleUnderscore->isChecked());
+    font.setPointSize(ui->titleFontSizeSpinner->value());
+
+    return font;
+}
+
+QFont MainWindow::getPdfTextFont(){
+    QFont font(ui->matchesFontComboBox->currentFont());
+    font.setBold(ui->matchesFontStyleBold->isChecked());
+    font.setItalic(ui->matchesFontStyleItalic->isChecked());
+    font.setUnderline(ui->matchesFontStyleUnderscore->isChecked());
+    font.setPointSize(ui->matchesFontSizeSpinner->value());
+
+    return font;
 }
 
 void MainWindow::printToPdf(){
@@ -282,6 +304,37 @@ void MainWindow::on_selectPdf_clicked(){
         pdfDialog->show();
     }
 }
+
+
+void MainWindow::on_titleFontComboBox_currentFontChanged(QFont font){
+    font.setBold(ui->titleFontStyleBold->isChecked());
+    font.setItalic(ui->titleFontStyleItalic->isChecked());
+    font.setUnderline(ui->titleFontStyleUnderscore->isChecked());
+
+    ui->titleEdit->setFont(font);
+}
+
+void MainWindow::on_titleFontStyleBold_toggled(bool checked){
+    QFont font(ui->titleEdit->font());
+    font.setBold(checked);
+
+    ui->titleEdit->setFont(font);
+}
+
+void MainWindow::on_titleFontStyleItalic_toggled(bool checked){
+    QFont font(ui->titleEdit->font());
+    font.setItalic(checked);
+
+    ui->titleEdit->setFont(font);
+}
+
+void MainWindow::on_titleFontStyleUnderscore_toggled(bool checked){
+    QFont font(ui->titleEdit->font());
+    font.setUnderline(checked);
+
+    ui->titleEdit->setFont(font);
+}
+
 
 void MainWindow::databaseDialogFinished(bool success, QScopedPointer<Database> &db, DatabaseSetup &dbSetup){
     if(success){

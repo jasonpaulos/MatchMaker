@@ -45,6 +45,8 @@ public:
 
     QString getPdfSavePath();
     QString getPdfPageTitle();
+    QFont getPdfTitleFont();
+    QFont getPdfTextFont();
     void printToPdf();
     void userQuery(QSqlQuery *query, Gender gen, std::vector<User> &users);
 
@@ -54,6 +56,10 @@ private slots:
     void on_stop_clicked();
     void on_clear_clicked();
     void on_selectPdf_clicked();
+    void on_titleFontComboBox_currentFontChanged(QFont font);
+    void on_titleFontStyleBold_toggled(bool checked);
+    void on_titleFontStyleItalic_toggled(bool checked);
+    void on_titleFontStyleUnderscore_toggled(bool checked);
 
 public slots:
     void databaseDialogFinished(bool success, QScopedPointer<Database> &db, DatabaseSetup &dbSetup);
@@ -82,7 +88,7 @@ private:
     QThread *maleThread, *femaleThread;
     DatabaseDialog *dialog;
     QFileDialog *pdfDialog;
-    QScopedPointer<Ui::MainWindow> ui;
+    Ui::MainWindow *ui;
 };
 
 #endif // MAINWINDOW_H
