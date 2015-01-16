@@ -2,7 +2,7 @@
 
 ## What is it?
 
-Every February, Sandra Day O'Connor High School hosts a matchmaking event where students can fill out a survey and then receive a list of top matches in the school based off their answers to the survey a few weeks later. This year (2014), we have decided to stop outsourcing the matching process and to use a combination of an online survey and a computer matching program instead. The MatchMaker project is the implementation of these features and has been in development for months leading up to this year's event. Every snippet of code has been custom made to work toward the goal of having a completely in-house, efficient, and extendible tool that is easy to use and works well. The MatchMaker project is licensed under the MIT license, and I encourage you to take advantage of this by examining the code, modifying it, and even extending the application to fit your own purposes. For more information, please see LICENSE.
+Every February, Sandra Day O'Connor High School hosts a matchmaking event where students can fill out a survey and then receive a list of top matches in the school based off their answers to the survey a few weeks later. Since 2014, we have decided to stop outsourcing the matching process and to use a combination of an online survey and a computer matching program instead. The MatchMaker project is the implementation of these features. Every snippet of code has been custom made to work toward the goal of having a completely in-house, efficient, and extendible tool that is easy to use and works well. The MatchMaker project is licensed under the MIT license, and I encourage you to take advantage of this by examining the code, modifying it, and even extending the application to fit your own purposes. For more information, please see LICENSE.
 
 ## How does it work?
 
@@ -10,7 +10,7 @@ There are two main parts to the project: the online survey and the matching prog
 
 ## How can I use it?
 
-The current release builds of the MatchMaker application for Windows (32 and 64 bit) and for Mac OSX (x86_64) can be found on the GitHub project page: https://github.com/JasonPaulos/MatchMaker. If you want to build the application from source code, please see Qt_MatchMaker/BUILDING.md.
+The current release builds of the MatchMaker application for Windows (32 and 64 bit) and for Mac OSX (x86_64) can be found on the GitHub project page: https://github.com/JasonPaulos/MatchMaker/releases. If you want to build the application from source code, please see Qt_MatchMaker/BUILDING.md.
 
 ## Who created it?
 
